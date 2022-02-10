@@ -235,6 +235,17 @@ class QcInfoRightsReport
     protected int $userPaginationCurrentPage = 1;
 
     /**
+     * @var int
+     */
+    protected int $usersPerPage;
+
+    /**
+     * @var int
+     */
+    protected int $groupsPerPage;
+
+
+    /**
      * QcInfoRightsReport constructor.
      *
      * @param \TYPO3\CMS\Core\Domain\Repository\PageRepository|null               $pagesRepository
@@ -251,6 +262,7 @@ class QcInfoRightsReport
         CharsetConverter $charsetConverter = null
     )
     {
+        debug("hello");
         $this->pagesRepository = $pagesRepository ?? GeneralUtility::makeInstance(PageRepository::class);
         $this->uriBuilder = $uriBuilder ?? GeneralUtility::makeInstance(UriBuilder::class);
         $this->backendUserGroupRepository = $backendUserGroupRepository ?? GeneralUtility::makeInstance(BackendUserGroupRepository::class);
@@ -289,11 +301,12 @@ class QcInfoRightsReport
         $this->orderBy = (string)(GeneralUtility::_GP('orderBy'));
         $this->set =  GeneralUtility::_GP(self::prefix_filter . '_SET');
 
-
+        // get iterms per page number
+        $this->groupsPerPage = $this->checkShowTsConfig('groupsPerPage');
+        $this->usersPerPage = $this->checkShowTsConfig('usersPerPage');
         if (GeneralUtility::_GP('groupPaginationPage') !== null){
             $this->groupPaginationCurrentPage = (int)GeneralUtility::_GP('groupPaginationPage');
             $this->pObj->MOD_SETTINGS['paginationPage'] = $this->groupPaginationCurrentPage;
-
         }
         if(GeneralUtility::_GP('userPaginationPage') !== null) {
             $this->userPaginationCurrentPage = (int)GeneralUtility::_GP('userPaginationPage');
@@ -492,30 +505,36 @@ class QcInfoRightsReport
             $sortActions[$key] = $this->constructBackendUri(['orderBy' => $key]);
         }
         $tabHeaders = $this->getVariablesForTableHeader($sortActions);
-
-
-        $items = [];
-        $backendUsers = $this->backendUserRepository->findDemanded($demand);
-        foreach ($backendUsers as $row) {
-            array_push($items, $row);
-        }
-        $itemsPerPage = 2;
-        $paginator = GeneralUtility::makeInstance(ArrayPaginator::class, $items, $this->userPaginationCurrentPage, $itemsPerPage);
-        $pagination = GeneralUtility::makeInstance(SimplePagination::class, $paginator);
+        $pagination = $this->getPagination($this->backendUserRepository->findDemanded($demand), $this->userPaginationCurrentPage,$this->usersPerPage );
         $view->assignMultiple([
             'prefix' => 'beUserList',
-            'backendUsers' => $paginator->getPaginatedItems(),
+            'backendUsers' => $pagination['paginatedData'],
             'dateFormat' => $GLOBALS['TYPO3_CONF_VARS']['SYS']['ddmmyy'],
             'timeFormat' => $GLOBALS['TYPO3_CONF_VARS']['SYS']['hhmm'],
             'showExportUsers' => $this->showExportUsers,
             'args' => $this->set,
             'tabHeader' => $tabHeaders,
-            'pagination' => $pagination,
+            'pagination' => $pagination['pagination'],
             'currentPage' => $this->id,
-            'numberOfPages' => $paginator->getNumberOfPages(),
-            'paginationPage' => $this->userPaginationCurrentPage // currentPage
+            'numberOfPages' => $pagination['numberOfPages'],
         ]);
         return $view;
+    }
+
+    public function getPagination($data, int $currentPage, int $itemsPerPage): array
+    {
+        $items = [];
+        // convert data to array
+        foreach ($data as $row) {
+            array_push($items, $row);
+        }
+        $paginator = GeneralUtility::makeInstance(ArrayPaginator::class, $items, $currentPage, $itemsPerPage);
+        $pagination = GeneralUtility::makeInstance(SimplePagination::class, $paginator);
+        return [
+            'paginatedData' => $paginator->getPaginatedItems(),
+            'pagination' => $pagination,
+            'numberOfPages' => $paginator->getNumberOfPages()
+        ];
     }
 
     /**
@@ -526,23 +545,15 @@ class QcInfoRightsReport
     protected function createViewForBeUserGroupListTab()
     {
         $view = $this->createView('BeUserGroupList');
-        $items = [];
-        $backendUserGroups =  $this->backendUserGroupRepository->findAll();
-        foreach ($backendUserGroups as $row) {
-            array_push($items, $row);
-        }
-        $itemsPerPage = 5;
-        $paginator = GeneralUtility::makeInstance(ArrayPaginator::class, $items, $this->groupPaginationCurrentPage, $itemsPerPage);
-        $pagination = GeneralUtility::makeInstance(SimplePagination::class, $paginator);
+        $pagination = $this->getPagination($this->backendUserGroupRepository->findAll(), $this->groupPaginationCurrentPage,$this->groupsPerPage );
         $view->assignMultiple([
             'prefix' => 'beUserGroupList',
-            'backendUserGroups' => $paginator->getPaginatedItems(),
+            'backendUserGroups' => $pagination['paginatedData'],
             'showExportGroups' => $this->showExportGroups,
             'showMembersColumn' => $this->checkShowTsConfig('showMembersColumn'),
-            'pagination' => $pagination,
+            'pagination' => $pagination['pagination'],
             'currentPage' => $this->id,
-            'numberOfPages' => $paginator->getNumberOfPages(),
-            'paginationPage' => $this->groupPaginationCurrentPage // currentPage
+            'numberOfPages' => $pagination['numberOfPages'],
         ]);
         return $view;
     }

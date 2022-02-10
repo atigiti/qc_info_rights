@@ -16,7 +16,7 @@ mod{
     // This option is to display the members column in the Backend user groups list for each group
     showMembersColumn = 1
 
-    // This option is to specified the number of items for each page and Backend user groups tab and Backend users list
+    // This option is to set the number of items per page for Backend user groups tab and Backend users list tab
     groupsPerPage = 100
     usersPerPage = 100
 

@@ -310,7 +310,6 @@ class QcInfoRightsReport
             $this->userPaginationCurrentPage = (int)GeneralUtility::_GP('userPaginationPage');
             $this->pObj->MOD_SETTINGS['paginationPage'] = $this->userPaginationCurrentPage;
         }
-
     }
 
     protected function createView(string $templateName): StandaloneView

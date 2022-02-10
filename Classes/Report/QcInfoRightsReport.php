@@ -30,7 +30,10 @@ use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
+use TYPO3\CMS\Core\Pagination\ArrayPaginator;
+use TYPO3\CMS\Core\Pagination\SimplePagination;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
+use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
@@ -222,6 +225,16 @@ class QcInfoRightsReport
     protected $set = [];
 
     /**
+     * @var int
+     */
+    protected int $groupPaginationCurrentPage = 1;
+
+    /**
+     * @var int
+     */
+    protected int $userPaginationCurrentPage = 1;
+
+    /**
      * QcInfoRightsReport constructor.
      *
      * @param \TYPO3\CMS\Core\Domain\Repository\PageRepository|null               $pagesRepository
@@ -275,6 +288,18 @@ class QcInfoRightsReport
         $this->view = $this->createView('InfoModule');
         $this->orderBy = (string)(GeneralUtility::_GP('orderBy'));
         $this->set =  GeneralUtility::_GP(self::prefix_filter . '_SET');
+
+
+        if (GeneralUtility::_GP('groupPaginationPage') !== null){
+            $this->groupPaginationCurrentPage = (int)GeneralUtility::_GP('groupPaginationPage');
+            $this->pObj->MOD_SETTINGS['paginationPage'] = $this->groupPaginationCurrentPage;
+
+        }
+        if(GeneralUtility::_GP('userPaginationPage') !== null) {
+            $this->userPaginationCurrentPage = (int)GeneralUtility::_GP('userPaginationPage');
+            $this->pObj->MOD_SETTINGS['paginationPage'] = $this->userPaginationCurrentPage;
+        }
+
     }
 
     protected function createView(string $templateName): StandaloneView
@@ -435,7 +460,7 @@ class QcInfoRightsReport
 
         $demand->setRejectUserStartWith('_');
 
-           // DebugUtility::debug($this->set);
+        // DebugUtility::debug($this->set);
         /*Check if we need to Set order Dynamic for the List*/
         $orderArray = self::ORDER_BY_VALUES[$this->orderBy] ?? [];
 
@@ -468,14 +493,27 @@ class QcInfoRightsReport
         }
         $tabHeaders = $this->getVariablesForTableHeader($sortActions);
 
+
+        $items = [];
+        $backendUsers = $this->backendUserRepository->findDemanded($demand);
+        foreach ($backendUsers as $row) {
+            array_push($items, $row);
+        }
+        $itemsPerPage = 2;
+        $paginator = GeneralUtility::makeInstance(ArrayPaginator::class, $items, $this->userPaginationCurrentPage, $itemsPerPage);
+        $pagination = GeneralUtility::makeInstance(SimplePagination::class, $paginator);
         $view->assignMultiple([
             'prefix' => 'beUserList',
-            'backendUsers' => $this->backendUserRepository->findDemanded($demand),
+            'backendUsers' => $paginator->getPaginatedItems(),
             'dateFormat' => $GLOBALS['TYPO3_CONF_VARS']['SYS']['ddmmyy'],
             'timeFormat' => $GLOBALS['TYPO3_CONF_VARS']['SYS']['hhmm'],
             'showExportUsers' => $this->showExportUsers,
             'args' => $this->set,
-            'tabHeader' => $tabHeaders
+            'tabHeader' => $tabHeaders,
+            'pagination' => $pagination,
+            'currentPage' => $this->id,
+            'numberOfPages' => $paginator->getNumberOfPages(),
+            'paginationPage' => $this->userPaginationCurrentPage // currentPage
         ]);
         return $view;
     }
@@ -488,12 +526,23 @@ class QcInfoRightsReport
     protected function createViewForBeUserGroupListTab()
     {
         $view = $this->createView('BeUserGroupList');
-
+        $items = [];
+        $backendUserGroups =  $this->backendUserGroupRepository->findAll();
+        foreach ($backendUserGroups as $row) {
+            array_push($items, $row);
+        }
+        $itemsPerPage = 5;
+        $paginator = GeneralUtility::makeInstance(ArrayPaginator::class, $items, $this->groupPaginationCurrentPage, $itemsPerPage);
+        $pagination = GeneralUtility::makeInstance(SimplePagination::class, $paginator);
         $view->assignMultiple([
             'prefix' => 'beUserGroupList',
-            'backendUserGroups' => $this->backendUserGroupRepository->findAll(),
+            'backendUserGroups' => $paginator->getPaginatedItems(),
             'showExportGroups' => $this->showExportGroups,
-            'showMembersColumn' => $this->checkShowTsConfig('showMembersColumn')
+            'showMembersColumn' => $this->checkShowTsConfig('showMembersColumn'),
+            'pagination' => $pagination,
+            'currentPage' => $this->id,
+            'numberOfPages' => $paginator->getNumberOfPages(),
+            'paginationPage' => $this->groupPaginationCurrentPage // currentPage
         ]);
         return $view;
     }
@@ -745,7 +794,7 @@ class QcInfoRightsReport
         return $tableHeaderHtml;
     }
 
-       // show members
+    // show members
     /**
      * This Function is delete the selected excluded link
      * @param ServerRequestInterface $request

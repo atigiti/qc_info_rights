@@ -33,7 +33,6 @@ use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Pagination\ArrayPaginator;
 use TYPO3\CMS\Core\Pagination\SimplePagination;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
-use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
@@ -262,7 +261,6 @@ class QcInfoRightsReport
         CharsetConverter $charsetConverter = null
     )
     {
-        debug("hello");
         $this->pagesRepository = $pagesRepository ?? GeneralUtility::makeInstance(PageRepository::class);
         $this->uriBuilder = $uriBuilder ?? GeneralUtility::makeInstance(UriBuilder::class);
         $this->backendUserGroupRepository = $backendUserGroupRepository ?? GeneralUtility::makeInstance(BackendUserGroupRepository::class);

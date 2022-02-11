@@ -518,7 +518,6 @@ class QcInfoRightsReport
             'tabHeader' => $tabHeaders,
             'pagination' => $pagination['pagination'],
             'currentPage' => $this->id,
-            'numberOfPages' => $pagination['numberOfPages'],
             'groupsCurrentPaginationPage' => $this->groupPaginationCurrentPage,
             'usersCurrentPaginationPage' => $this->userPaginationCurrentPage
         ]);
@@ -558,7 +557,6 @@ class QcInfoRightsReport
             'pagination' => $pagination['pagination'],
             'currentPage' => $this->id,
             'args' => $this->set,
-            'numberOfPages' => $pagination['numberOfPages'],
             'groupsCurrentPaginationPage' => $this->groupPaginationCurrentPage,
             'usersCurrentPaginationPage' => $this->userPaginationCurrentPage
 

@@ -1,5 +1,4 @@
 <html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers">
-
 <div class="mb-10">
     <div class="form-group mb-10">
         <label for="user_SET_username">{f:translate(key:
@@ -13,7 +12,9 @@
         <f:form.textfield class="form-control input-sm" type="text" id="user_SET_mail" name="user_SET[mail]"
                           value="{f:if(condition: args.mail, then: args.mail, else: '')}"/>
     </div>
-
+    <f:comment>keep the current page in the groups page</f:comment>
+    <f:form.textfield  type="hidden" name="groupPaginationPage"
+                      value="{groupsCurrentPaginationPage}"/>
     <div class="form-group mb-10">
         <label for="user_SET_hideInactif">{f:translate(key:
             'LLL:EXT:qc_info_rights/Resources/Private/Language/Module/locallang.xlf:beUserListsFilter.hideInactif')}</label>

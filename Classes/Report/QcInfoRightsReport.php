@@ -307,10 +307,10 @@ class QcInfoRightsReport
         // get iterms per page number
         $this->groupsPerPage = $this->checkShowTsConfig('groupsPerPage');
         $this->usersPerPage = $this->checkShowTsConfig('usersPerPage');
-        if (GeneralUtility::_GP('groupPaginationPage') !== null){
+        if (GeneralUtility::_GP('groupPaginationPage') !== null && (int)GeneralUtility::_GP('groupPaginationPage') > 0){
             $this->groupPaginationCurrentPage = (int)GeneralUtility::_GP('groupPaginationPage');
         }
-        if(GeneralUtility::_GP('userPaginationPage') !== null) {
+        if(GeneralUtility::_GP('userPaginationPage') !== null && (int)GeneralUtility::_GP('userPaginationPage') > 0) {
             $this->userPaginationCurrentPage = (int)GeneralUtility::_GP('userPaginationPage');
         }
 
@@ -556,8 +556,8 @@ class QcInfoRightsReport
             'showExportGroups' => $this->showExportGroups,
             'showMembersColumn' => $this->checkShowTsConfig('showMembersColumn'),
             'pagination' => $pagination['pagination'],
-            'args' => $this->set,
             'currentPage' => $this->id,
+            'args' => $this->set,
             'numberOfPages' => $pagination['numberOfPages'],
             'groupsCurrentPaginationPage' => $this->groupPaginationCurrentPage,
             'usersCurrentPaginationPage' => $this->userPaginationCurrentPage

@@ -14,7 +14,7 @@
                                                 </a>
                             </f:if>
                             <f:if condition="{currentTab} == 'BeGroupUserList'">
-                                <a href="{f:be.uri(route:'web_info', parameters: '{currentPage: currentPage, id: currentPage, currentTab: currentTab, groupPaginationPage: 1, userPaginationPage: userCurrentPage}')}" title="{f:translate(extensionName: 'fluid', key:'widget.pagination.first')}">
+                                <a href="{f:be.uri(route:'web_info', parameters: '{currentPage: currentPage, id: currentPage, currentTab: currentTab, groupPaginationPage: 1, userPaginationPage: userCurrentPage, user_SET_mail: args.mail, user_SET_username: args.username}')}" title="{f:translate(extensionName: 'fluid', key:'widget.pagination.first')}">
 								    <core:icon identifier="actions-view-paging-first" />
 							    </a>
                             </f:if>
@@ -28,7 +28,7 @@
 							</a>
                             </f:if>
                             <f:if condition="{currentTab} == 'BeGroupUserList'">
-                                <a href="{f:be.uri(route:'web_info', parameters: '{currentPage: currentPage, id: currentPage, currentTab: currentTab, groupPaginationPage: pagination.previousPageNumber, userPaginationPage: userCurrentPage}')}" title="{f:translate(extensionName: 'fluid', key:'widget.pagination.previous')}">
+                                <a href="{f:be.uri(route:'web_info', parameters: '{currentPage: currentPage, id: currentPage, currentTab: currentTab, groupPaginationPage: pagination.previousPageNumber, userPaginationPage: userCurrentPage, user_SET_mail: args.mail, user_SET_username: args.username}')}" title="{f:translate(extensionName: 'fluid', key:'widget.pagination.previous')}">
 								<core:icon identifier="actions-view-paging-previous" />
 							</a>
                             </f:if>
@@ -63,7 +63,7 @@
 							</a>
                             </f:if>
                             <f:if condition="{currentTab} == 'BeGroupUserList'">
-                               <a href="{f:be.uri(route:'web_info', parameters: '{currentPage: currentPage, id: currentPage, currentTab: currentTab, groupPaginationPage: pagination.nextPageNumber, userPaginationPage: userCurrentPage}')}" title="{f:translate(extensionName: 'fluid', key:'widget.pagination.next')}">
+                               <a href="{f:be.uri(route:'web_info', parameters: '{currentPage: currentPage, id: currentPage, currentTab: currentTab, groupPaginationPage: pagination.nextPageNumber, userPaginationPage: userCurrentPage, user_SET_mail: args.mail, user_SET_username: args.username}')}" title="{f:translate(extensionName: 'fluid', key:'widget.pagination.next')}">
 								<core:icon identifier="actions-view-paging-next" />
 							    </a>
                             </f:if>
@@ -77,7 +77,7 @@
 							</a>
                             </f:if>
                             <f:if condition="{currentTab} == 'BeGroupUserList'">
-                                <a href="{f:be.uri(route:'web_info', parameters: '{currentPage: currentPage, id: currentPage, currentTab: currentTab, groupPaginationPage: pagination.lastPageNumber, userPaginationPage: userCurrentPage}')}" title="{f:translate(extensionName: 'fluid', key:'widget.pagination.last')}">
+                                <a href="{f:be.uri(route:'web_info', parameters: '{currentPage: currentPage, id: currentPage, currentTab: currentTab, groupPaginationPage: pagination.lastPageNumber, userPaginationPage: userCurrentPage, user_SET_mail: args.mail, user_SET_username: args.username}')}" title="{f:translate(extensionName: 'fluid', key:'widget.pagination.last')}">
 								    <core:icon identifier="actions-view-paging-last" />
 							    </a>
                             </f:if>

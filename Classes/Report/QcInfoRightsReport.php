@@ -298,7 +298,12 @@ class QcInfoRightsReport
         $this->view = $this->createView('InfoModule');
         $this->orderBy = (string)(GeneralUtility::_GP('orderBy'));
         $this->set =  GeneralUtility::_GP(self::prefix_filter . '_SET');
-
+        if(GeneralUtility::_GP('user_SET_mail')){
+            $this->set['mail'] = GeneralUtility::_GP('user_SET_mail');
+        }
+        if(GeneralUtility::_GP('user_SET_username')){
+            $this->set['username'] = GeneralUtility::_GP('user_SET_username');
+        }
         // get iterms per page number
         $this->groupsPerPage = $this->checkShowTsConfig('groupsPerPage');
         $this->usersPerPage = $this->checkShowTsConfig('usersPerPage');
@@ -551,6 +556,7 @@ class QcInfoRightsReport
             'showExportGroups' => $this->showExportGroups,
             'showMembersColumn' => $this->checkShowTsConfig('showMembersColumn'),
             'pagination' => $pagination['pagination'],
+            'args' => $this->set,
             'currentPage' => $this->id,
             'numberOfPages' => $pagination['numberOfPages'],
             'groupsCurrentPaginationPage' => $this->groupPaginationCurrentPage,

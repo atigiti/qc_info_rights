@@ -464,6 +464,7 @@ class QcInfoRightsReport
      */
     protected function createViewForBeUserListTab()
     {
+        debug('flow');
         $prefix = "user";
 
         $this->setPageInfo();
@@ -547,6 +548,7 @@ class QcInfoRightsReport
      */
     protected function createViewForBeUserGroupListTab()
     {
+        debug('tototo');
         $view = $this->createView('BeUserGroupList');
         $pagination = $this->getPagination($this->backendUserGroupRepository->findAll(), $this->groupPaginationCurrentPage,$this->groupsPerPage );
         $view->assignMultiple([

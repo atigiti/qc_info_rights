@@ -304,12 +304,11 @@ class QcInfoRightsReport
         $this->usersPerPage = $this->checkShowTsConfig('usersPerPage');
         if (GeneralUtility::_GP('groupPaginationPage') !== null){
             $this->groupPaginationCurrentPage = (int)GeneralUtility::_GP('groupPaginationPage');
-            $this->pObj->MOD_SETTINGS['paginationPage'] = $this->groupPaginationCurrentPage;
         }
         if(GeneralUtility::_GP('userPaginationPage') !== null) {
             $this->userPaginationCurrentPage = (int)GeneralUtility::_GP('userPaginationPage');
-            $this->pObj->MOD_SETTINGS['paginationPage'] = $this->userPaginationCurrentPage;
         }
+
     }
 
     protected function createView(string $templateName): StandaloneView
@@ -503,6 +502,7 @@ class QcInfoRightsReport
         }
         $tabHeaders = $this->getVariablesForTableHeader($sortActions);
         $pagination = $this->getPagination($this->backendUserRepository->findDemanded($demand), $this->userPaginationCurrentPage,$this->usersPerPage );
+        // we assign the groupsCurrentPaginationPage and usersCurrentPaginationPage to keep the pagination for each tab separated
         $view->assignMultiple([
             'prefix' => 'beUserList',
             'backendUsers' => $pagination['paginatedData'],
@@ -514,6 +514,8 @@ class QcInfoRightsReport
             'pagination' => $pagination['pagination'],
             'currentPage' => $this->id,
             'numberOfPages' => $pagination['numberOfPages'],
+            'groupsCurrentPaginationPage' => $this->groupPaginationCurrentPage,
+            'usersCurrentPaginationPage' => $this->userPaginationCurrentPage
         ]);
         return $view;
     }
@@ -551,6 +553,9 @@ class QcInfoRightsReport
             'pagination' => $pagination['pagination'],
             'currentPage' => $this->id,
             'numberOfPages' => $pagination['numberOfPages'],
+            'groupsCurrentPaginationPage' => $this->groupPaginationCurrentPage,
+            'usersCurrentPaginationPage' => $this->userPaginationCurrentPage
+
         ]);
         return $view;
     }

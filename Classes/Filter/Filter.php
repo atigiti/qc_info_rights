@@ -5,22 +5,38 @@ class Filter
     /**
      * @var string
      */
-    protected string $username;
+    protected string $username='';
 
     /**
      * @var string
      */
-    protected string $mail;
+    protected string $mail='';
 
     /**
-     * @var bool
+     * @var int
      */
-    protected bool $hideInactiveUsers;
+    protected int $hideInactiveUsers = 0;
 
     /**
      * @var int
      */
     protected int $currentUsersTabPage;
+
+    /**
+     * @var string
+     */
+    protected string $userType;
+
+    /**
+     * @var array
+     */
+    protected array $orderArray = [];
+
+    /*
+     * @var string
+     */
+    protected string $rejectUserStartWith = '';
+
 
     /**
      * @var int
@@ -59,21 +75,7 @@ class Filter
         $this->mail = $mail;
     }
 
-    /**
-     * @return bool
-     */
-    public function isHideInactiveUsers(): bool
-    {
-        return $this->hideInactiveUsers;
-    }
 
-    /**
-     * @param bool $hideInactiveUsers
-     */
-    public function setHideInactiveUsers(bool $hideInactiveUsers): void
-    {
-        $this->hideInactiveUsers = $hideInactiveUsers;
-    }
 
     /**
      * @return int
@@ -106,6 +108,71 @@ class Filter
     {
         $this->currentGroupsTabPage = $currentGroupsTabPage >= 1 ? $currentGroupsTabPage : 1;
     }
+
+    /**
+     * @return string
+     */
+    public function getUserType(): string
+    {
+        return $this->userType;
+    }
+
+    /**
+     * @param string $userType
+     */
+    public function setUserType(string $userType): void
+    {
+        $this->userType = $userType;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOrderArray(): array
+    {
+        return $this->orderArray;
+    }
+
+    /**
+     * @param array $orderArray
+     */
+    public function setOrderArray(array $orderArray): void
+    {
+        $this->orderArray = $orderArray;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectUserStartWith(): string
+    {
+        return $this->rejectUserStartWith;
+    }
+
+    /**
+     * @param string $rejectUserStartWith
+     */
+    public function setRejectUserStartWith(string $rejectUserStartWith): void
+    {
+        $this->rejectUserStartWith = $rejectUserStartWith;
+    }
+
+    /**
+     * @return int
+     */
+    public function getHideInactiveUsers(): int
+    {
+        return $this->hideInactiveUsers;
+    }
+
+    /**
+     * @param int $hideInactiveUsers
+     */
+    public function setHideInactiveUsers(int $hideInactiveUsers): void
+    {
+        $this->hideInactiveUsers = $hideInactiveUsers;
+    }
+
 
 
 }

@@ -2,17 +2,6 @@
 
 declare(strict_types=1);
 
-/***
- *
- * This file is based on the "Backend Module" Extension for TYPO3 CMS.
- *
- * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- *  (c) 2016 Christian Fries <christian.fries@lst.team>
- *
- ***/
-
 namespace Qc\QcInfoRights\BackendSession;
 
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
@@ -32,7 +21,7 @@ class BackendSession
      *
      * @var string
      */
-    protected $storageKey = 'filterKey';
+    protected string $storageKey = 'qc_infoRights_filterKey';
 
     public function __construct()
     {
@@ -78,6 +67,6 @@ class BackendSession
     public function get(string $key)
     {
         $sessionData = $this->sessionObject->getSessionData($this->storageKey);
-        return isset($sessionData[$key]) ? $sessionData[$key] : null;
+        return $sessionData[$key] ?? null;
     }
 }

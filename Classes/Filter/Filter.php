@@ -88,7 +88,7 @@ class Filter
      */
     public function setCurrentUsersTabPage(int $currentUsersTabPage): void
     {
-        $this->currentUsersTabPage = $currentUsersTabPage;
+        $this->currentUsersTabPage = $currentUsersTabPage >= 1  ? $currentUsersTabPage : 1;
     }
 
     /**
@@ -104,7 +104,7 @@ class Filter
      */
     public function setCurrentGroupsTabPage(int $currentGroupsTabPage): void
     {
-        $this->currentGroupsTabPage = $currentGroupsTabPage;
+        $this->currentGroupsTabPage = $currentGroupsTabPage >= 1 ? $currentGroupsTabPage : 1;
     }
 
 

@@ -15,8 +15,10 @@
 namespace Qc\QcInfoRights\Report;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Qc\QcInfoRights\BackendSession\BackendSession;
 use Qc\QcInfoRights\Domain\Model\ModuleData;
 use Qc\QcInfoRights\Domain\Repository\BackendUserRepository;
+use Qc\QcInfoRights\Filter\Filter;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Backend\Tree\View\PageTreeView;
@@ -243,6 +245,13 @@ class QcInfoRightsReport
      */
     protected int $groupsPerPage;
 
+    /**
+     * @var Filter
+     */
+    protected Filter $filter;
+
+    protected BackendSession $backendSession;
+
 
     /**
      * QcInfoRightsReport constructor.
@@ -266,6 +275,8 @@ class QcInfoRightsReport
         $this->backendUserGroupRepository = $backendUserGroupRepository ?? GeneralUtility::makeInstance(BackendUserGroupRepository::class);
         $this->localizationUtility = $localizationUtility ?? GeneralUtility::makeInstance(LocalizationUtility::class);
         $this->charsetConverter = $charsetConverter ?? GeneralUtility::makeInstance(CharsetConverter::class);
+        $this->filter = $filter ?? GeneralUtility::makeInstance(Filter::class);
+        $this->backendSession = $backendSession ?? GeneralUtility::makeInstance(BackendSession::class);
 
         //Initialize Repository Backend user
         $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
@@ -298,6 +309,16 @@ class QcInfoRightsReport
         $this->view = $this->createView('InfoModule');
         $this->orderBy = (string)(GeneralUtility::_GP('orderBy'));
         $this->set =  GeneralUtility::_GP(self::prefix_filter . '_SET');
+
+        if($this->set !== null){
+                $this->filter->setUsername($this->set['username']);
+                $this->filter->setMail($this->set['mail']);
+                $this->filter->setHideInactiveUsers($this->set['hideInactif']);
+                // Reset pagination for users tab
+                $this->filter->setCurrentUsersTabPage(1);
+            // Store filter, pagination parameters
+        }
+
         if(GeneralUtility::_GP('user_SET_mail')){
             $this->set['mail'] = GeneralUtility::_GP('user_SET_mail');
         }
@@ -308,11 +329,16 @@ class QcInfoRightsReport
         $this->groupsPerPage = $this->checkShowTsConfig('groupsPerPage');
         $this->usersPerPage = $this->checkShowTsConfig('usersPerPage');
         if (GeneralUtility::_GP('groupPaginationPage') !== null && (int)GeneralUtility::_GP('groupPaginationPage') > 0){
-            $this->groupPaginationCurrentPage = (int)GeneralUtility::_GP('groupPaginationPage');
+            $this->filter->setCurrentGroupsTabPage((int)GeneralUtility::_GP('groupPaginationPage'));
+            //$this->groupPaginationCurrentPage = (int)GeneralUtility::_GP('groupPaginationPage');
         }
         if(GeneralUtility::_GP('userPaginationPage') !== null && (int)GeneralUtility::_GP('userPaginationPage') > 0) {
-            $this->userPaginationCurrentPage = (int)GeneralUtility::_GP('userPaginationPage');
+            $this->filter->setCurrentUsersTabPage((int)GeneralUtility::_GP('userPaginationPage'));
+            //$this->userPaginationCurrentPage = (int)GeneralUtility::_GP('userPaginationPage');
         }
+
+        // Store Filter in Session
+        $this->backendSession->store('myFilter', $this->filter);
 
     }
 
@@ -464,7 +490,6 @@ class QcInfoRightsReport
      */
     protected function createViewForBeUserListTab()
     {
-        debug('flow');
         $prefix = "user";
 
         $this->setPageInfo();
@@ -548,7 +573,6 @@ class QcInfoRightsReport
      */
     protected function createViewForBeUserGroupListTab()
     {
-        debug('tototo');
         $view = $this->createView('BeUserGroupList');
         $pagination = $this->getPagination($this->backendUserGroupRepository->findAll(), $this->groupPaginationCurrentPage,$this->groupsPerPage );
         $view->assignMultiple([

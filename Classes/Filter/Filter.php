@@ -20,12 +20,9 @@ class Filter
     /**
      * @var int
      */
-    protected int $currentUsersTabPage;
+    protected int $currentUsersTabPage = 1;
 
-    /**
-     * @var string
-     */
-    protected string $userType;
+
 
     /**
      * @var array
@@ -41,7 +38,7 @@ class Filter
     /**
      * @var int
      */
-    protected int $currentGroupsTabPage;
+    protected int $currentGroupsTabPage = 1;
 
     /**
      * @return string
@@ -109,21 +106,6 @@ class Filter
         $this->currentGroupsTabPage = $currentGroupsTabPage >= 1 ? $currentGroupsTabPage : 1;
     }
 
-    /**
-     * @return string
-     */
-    public function getUserType(): string
-    {
-        return $this->userType;
-    }
-
-    /**
-     * @param string $userType
-     */
-    public function setUserType(string $userType): void
-    {
-        $this->userType = $userType;
-    }
 
     /**
      * @return array

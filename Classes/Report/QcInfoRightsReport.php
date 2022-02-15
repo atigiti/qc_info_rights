@@ -16,6 +16,7 @@ namespace Qc\QcInfoRights\Report;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Qc\QcInfoRights\BackendSession\BackendSession;
+use Qc\QcInfoRights\Domain\Model\BackendUser;
 use Qc\QcInfoRights\Domain\Model\Demand;
 use Qc\QcInfoRights\Domain\Model\ModuleData;
 use Qc\QcInfoRights\Domain\Repository\BackendUserRepository;
@@ -239,12 +240,12 @@ class QcInfoRightsReport
     /**
      * @var int
      */
-    protected int $usersPerPage;
+    protected int $usersPerPage = 100;
 
     /**
      * @var int
      */
-    protected int $groupsPerPage;
+    protected int $groupsPerPage = 100;
 
     /**
      * @var Filter
@@ -301,6 +302,14 @@ class QcInfoRightsReport
 
         /*Initialize variable of access from TsConfig Array*/
         $this->updateAccessByTsConfig();
+        // Build Demand for Users List Tab
+        $this->demand= new Demand();
+
+        if($this->backendSession->get('myFilter') == null){
+             $this->backendSession->setStorageKey('myFilter');
+             $this->backendSession->store('myFilter', $this->filter);
+         }
+
     }
 
     /**
@@ -319,11 +328,11 @@ class QcInfoRightsReport
         $this->orderBy = (string)(GeneralUtility::_GP('orderBy'));
         $this->set =  GeneralUtility::_GP(self::prefix_filter . '_SET');
 
-        if($this->set !== null){
+        /*if($this->set !== null){
             $this->filter->setUsername($this->set['username']);
             $this->filter->setMail($this->set['mail']);
             if(!empty($this->set['hideInactif']) && (int)($this->set['hideInactif']) == 1){
-                //$this->filter->setHideInactiveUsers(Demand::STATUS_ACTIVE);
+                $this->filter->setHideInactiveUsers(Demand::STATUS_ACTIVE);
             }
             // Reset pagination for users tab
             $this->filter->setCurrentUsersTabPage(1);
@@ -348,15 +357,12 @@ class QcInfoRightsReport
             //$this->userPaginationCurrentPage = (int)GeneralUtility::_GP('userPaginationPage');
         }
 
+        */
         $this->filter->setRejectUserStartWith('_');
         $this->filter->setOrderArray(self::ORDER_BY_VALUES[$this->orderBy] ?? []);
-        $this->filter->setUserType(Demand::USERTYPE_USERONLY);
-
-        // Store Filter in Session
-        $this->backendSession->store('myFilter', $this->filter);
-        $this->moduleData = $this->loadModuleData();
-
+        //$this->filter->setUserType(Demand::USERTYPE_USERONLY);
     }
+
 
     protected function createView(string $templateName): StandaloneView
     {
@@ -511,8 +517,7 @@ class QcInfoRightsReport
         $this->setPageInfo();
 
         $view = $this->createView('BeUserList');
-        // Build Demand for Users List Tab
-        $this->demand= $this->moduleData->getDemand();
+
         $this->demand = $this->mapFilterToDemand($this->filter);
         /*$demand = $this->moduleData->getDemand();
 
@@ -542,8 +547,6 @@ class QcInfoRightsReport
         if(!empty($this->set['hideInactif']) && (int)($this->set['hideInactif']) == 1){
             $demand->setStatus(Demand::STATUS_ACTIVE);
         }*/
-        debug($this->getPagination($this->backendUserRepository->findDemanded($this->demand), $this->userPaginationCurrentPage,$this->usersPerPage)['paginatedData']);
-        debug();
         /**Implement tableau Header withDynamically order By Field*/
         foreach (array_keys(self::ORDER_BY_VALUES) as $key) {
             $sortActions[$key] = $this->constructBackendUri(['orderBy' => $key]);
@@ -866,32 +869,59 @@ class QcInfoRightsReport
     }
 
 
-    // show members
+    /**
+     * This function is used to manage filter and pagination
+     */
+    public function updateFilter(){
+        $this->backendSession->store('myFilter', $this->filter);
+        return $this->backendSession->get('myFilter');
+    }
+
+    // render users
     /**
      * This Function is delete the selected excluded link
      * @param ServerRequestInterface $request
      * @return ResponseInterface
      */
     public function renderUsers(ServerRequestInterface $request): ResponseInterface{
-        if($this->demand !== null){
-            $data = $this->getPagination($this->backendUserRepository->findDemanded($this->demand), $this->userPaginationCurrentPage,$this->usersPerPage);
-        }
-        $data = array(
-            1 => 'hello world',
-            2 => 'toto'
-        );
-        $data = [1 => 'hello world'];
         $urlParam = $request->getQueryParams();
-        return new JsonResponse($data);
+        // update filter
+        if($urlParam['username'] != ''){
+            $this->filter->setUsername($urlParam['username']);
+        }
+        if($urlParam['email'] != ''){
+            $this->filter->setMail($urlParam['email']);
+        }
+        $this->filter->setHideInactiveUsers($urlParam['hideInactif'] ? 1 : 0);
+        $filter = $this->updateFilter();
+        if($filter !== null){
+            $this->demand = $this->mapFilterToDemand($filter);
+            $data =$this->getPagination($this->backendUserRepository->findDemanded($this->demand), $this->userPaginationCurrentPage,$this->usersPerPage)['paginatedData'];
+            $result = [];
+            foreach ($data as $item){
+                $element = [
+                    $item->getUsername(),
+                    $item->getEmail(),
+                    $item->getLastLoginDateAndTime(),
+                    $item->isActive()
+                ];
+                array_push($result, $element);
+            }
+            return new JsonResponse($result);
+        }
+        else{
+            return new JsonResponse(['toto']);
+        }
+
     }
 
 
     public function mapFilterToDemand(Filter  $filter) {
-            $demand = $this->moduleData->getDemand();
+            $demand = new Demand();
             $demand->setRejectUserStartWith($filter->getRejectUserStartWith());
             /*Check if we need to Set order Dynamic for the List*/
             $demand->setOrderArray($filter->getOrderArray());
-            $demand->setUserType($filter->getUserType());
+           // $demand->setUserType($filter->getUserType());
             //Filter for user name
             $demand->setUserName($filter->getUsername());
             //Filter for address mail
@@ -900,5 +930,7 @@ class QcInfoRightsReport
              $demand->setStatus($filter->getHideInactiveUsers());
             return $demand;
     }
+
+
 
 }

@@ -67,6 +67,7 @@ class BackendSession
     public function get(string $key)
     {
         $sessionData = $this->sessionObject->getSessionData($this->storageKey);
+        debug($sessionData);
         return $sessionData[$key] ?? null;
     }
 }

@@ -240,12 +240,12 @@ class QcInfoRightsReport
     /**
      * @var int
      */
-    protected int $usersPerPage = 100;
+    protected int $usersPerPage = 5;
 
     /**
      * @var int
      */
-    protected int $groupsPerPage = 100;
+    protected int $groupsPerPage = 5;
 
     /**
      * @var Filter
@@ -305,11 +305,6 @@ class QcInfoRightsReport
         // Build Demand for Users List Tab
         $this->demand= new Demand();
 
-        if($this->backendSession->get('myFilter') == null){
-             $this->backendSession->setStorageKey('myFilter');
-             $this->backendSession->store('myFilter', $this->filter);
-         }
-
     }
 
     /**
@@ -358,6 +353,18 @@ class QcInfoRightsReport
         }
 
         */
+        if (GeneralUtility::_GP('groupPaginationPage') !== null && (int)GeneralUtility::_GP('groupPaginationPage') > 0){
+            $this->groupPaginationCurrentPage = (int)GeneralUtility::_GP('groupPaginationPage');
+        }
+        if(GeneralUtility::_GP('userPaginationPage') !== null && (int)GeneralUtility::_GP('userPaginationPage') > 0) {
+            $this->userPaginationCurrentPage = (int)GeneralUtility::_GP('userPaginationPage');
+        }
+        if($this->backendSession->get('myFilter') != null)
+            $this->filter = $this->backendSession->get('myFilter');
+        else{
+            debug('tptptp');
+            $this->filter = $this->updateFilter();
+        }
         $this->filter->setRejectUserStartWith('_');
         $this->filter->setOrderArray(self::ORDER_BY_VALUES[$this->orderBy] ?? []);
         //$this->filter->setUserType(Demand::USERTYPE_USERONLY);
@@ -553,6 +560,7 @@ class QcInfoRightsReport
         }
         $tabHeaders = $this->getVariablesForTableHeader($sortActions);
         $pagination = $this->getPagination($this->backendUserRepository->findDemanded($this->demand), $this->userPaginationCurrentPage,$this->usersPerPage );// we assign the groupsCurrentPaginationPage and usersCurrentPaginationPage to keep the pagination for each tab separated
+
         $view->assignMultiple([
             'prefix' => 'beUserList',
             'backendUsers' => $pagination['paginatedData'],
@@ -894,19 +902,20 @@ class QcInfoRightsReport
         }
         $this->filter->setHideInactiveUsers($urlParam['hideInactif'] ? 1 : 0);
         $filter = $this->updateFilter();
+        $result = [];
         if($filter !== null){
             $this->demand = $this->mapFilterToDemand($filter);
             $data =$this->getPagination($this->backendUserRepository->findDemanded($this->demand), $this->userPaginationCurrentPage,$this->usersPerPage)['paginatedData'];
-            $result = [];
             foreach ($data as $item){
-                $element = [
+                $result [] = [
                     $item->getUsername(),
                     $item->getEmail(),
                     $item->getLastLoginDateAndTime(),
                     $item->isActive()
                 ];
-                array_push($result, $element);
             }
+        }
+        if(!empty($result)){
             return new JsonResponse($result);
         }
         else{
